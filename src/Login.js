@@ -14,8 +14,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import HomeIcon from "@material-ui/icons/Home";
-import { Link } from "react-router-dom";
-//import {useParams} from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -41,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Login(props) {
 	const classes = useStyles();
 	const theme = useTheme();
+	const history = useHistory();
 
 	function getCookie(cname) {
 		var name = cname + "=";
@@ -54,7 +54,7 @@ export default function Login(props) {
 	}
 
 	if (getCookie("lc_debug") !== "" && getCookie("lc_uid") !== "") {
-		window.location.hash = "/";
+		history.push("/");
 	}
 
 	return (
@@ -69,7 +69,7 @@ export default function Login(props) {
 							color="inherit"
 							aria-label="menu"
 							onClick={() => {
-								window.location.hash = "/";
+								history.push("/");
 							}}
 						>
 							<HomeIcon />

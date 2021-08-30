@@ -33,8 +33,8 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import HomeIcon from "@material-ui/icons/Home";
 import MenuIcon from "@material-ui/icons/Menu";
 import ImageIcon from "@material-ui/icons/Image";
-import { SnackbarProvider, useSnackbar } from "notistack";
-import { Link } from "react-router-dom";
+import { useSnackbar } from "notistack";
+import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -90,7 +90,7 @@ function ChatView(props) {
 		}
 		return "";
 	}
-	
+
 	function updateMsg(content, firsttime) {
 		try {
 			setMsgs(content);
@@ -142,6 +142,15 @@ function ChatView(props) {
 					}, 3000)
 				);
 			});
+		fetch(endpoint + "/rooms_all", {
+			method: "GET"
+		})
+			.then((res) => res.json())
+			.catch((error) => handleInform("Sidebar failed: " + error, "error"))
+			.then(
+				(response) =>
+					(sessionStorage.recentRoom = JSON.stringify(response))
+			);
 	}
 
 	useEffect(() => {
@@ -149,46 +158,6 @@ function ChatView(props) {
 			clearTimeout(timeo);
 		}
 		loadRoom(1);
-		let rrobject = JSON.parse(localStorage.recentRoom);
-		if (rrobject.rooms.length >= 5) {
-			rrobject.rooms.shift();
-		}
-		let date = new Date();
-		rrobject.rooms.unshift({
-			name: chatroom,
-			date:
-				date.getMonth() +
-				1 +
-				"-" +
-				date.getDate() +
-				" " +
-				date.getHours() +
-				":" +
-				date.getMinutes()
-		});
-		/*
-		            				        let rrobject_raw=JSON.parse(localStorage.recentRoom);
-		            				        if (rrobject.rooms.length >= 5) {
-		            				            rrobject.rooms.shift();
-		            				        }
-		            				        let date = new Date();
-		            				        rrobject_raw.rooms.unshift({"name":roomname, "date":(date.getMonth() + 1) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes()});
-		            				        var rrobject = {"rooms":[]};
-		            				        rrobject.rooms = [];
-		            				        for(var i = 0; i < rrobject_raw.rooms.length; i++) {
-		            				            let flag = true;
-		            				            for(var j = 0; j < rrobject.rooms.length; j++) {
-		            				                if (rrobject_raw.rooms[i].name == rrobject.rooms[i].name) {
-		            				                    flag = false;
-		            				                    break;
-		            				                }
-		            				            }
-		            				            if (flag) {
-		            				                rrobject.rooms.push(rrobject_raw.rooms[i]);
-		            				            }
-		            				        }
-		            				        */
-		localStorage.recentRoom = JSON.stringify(rrobject);
 	}, [chatroom]);
 
 	return (
@@ -478,6 +447,7 @@ ScrollBtn.propTypes = {
 
 function LeftBar(props) {
 	const classes = useStyles();
+	const history = useHistory();
 
 	function avatarColor(name) {
 		var str = "";
@@ -494,7 +464,7 @@ function LeftBar(props) {
 					<ListItem
 						button
 						onClick={() => {
-							window.location.hash = "/";
+							history.push("/");
 						}}
 					>
 						<ListItemIcon>
@@ -503,47 +473,37 @@ function LeftBar(props) {
 						<ListItemText primary="Home" />
 					</ListItem>
 					<Divider />
-					<ListItem>Recent Rooms</ListItem>
-					{JSON.parse(localStorage.recentRoom).rooms.map(
-						(v, index) => {
-							return (
-								<ListItem
-									alignItems="flex-start"
-									key={index}
-									button
-									onClick={function () {
-										let roomname = v.name;
-										if (roomname !== "") {
-											window.location.hash =
-												"/chat/" +
-												encodeURIComponent(roomname);
-											return false;
-										}
-									}}
-								>
-									<ListItemAvatar>
-										<Avatar
-											style={{
-												backgroundColor: avatarColor(
-													v.name
-												)
-											}}
-										>
-											{v.name.substr(0, 2)}
-										</Avatar>
-									</ListItemAvatar>
-									<ListItemText
-										primary={v.name}
-										secondary={
-											<React.Fragment>
-												{v.date}
-											</React.Fragment>
-										}
-									/>
-								</ListItem>
-							);
-						}
-					)}
+					<ListItem>Rooms</ListItem>
+					{JSON.parse(sessionStorage.recentRoom).map((v, index) => {
+						return (
+							<ListItem
+								alignItems="flex-start"
+								key={v}
+								button
+								onClick={function () {
+									let roomname = v;
+									if (roomname !== "") {
+										history.push(
+											"/chat/" +
+												encodeURIComponent(roomname)
+										);
+										return false;
+									}
+								}}
+							>
+								<ListItemAvatar>
+									<Avatar
+										style={{
+											backgroundColor: avatarColor(v)
+										}}
+									>
+										{v.substr(0, 2)}
+									</Avatar>
+								</ListItemAvatar>
+								<ListItemText primary={v} />
+							</ListItem>
+						);
+					})}
 				</List>
 			</div>
 		</React.Fragment>
@@ -554,12 +514,6 @@ export default function App(props) {
 	let { room } = props.match.params;
 	const classes = useStyles();
 	const theme = useTheme();
-
-	/*
-    if ((getCookie("lc_debug") === "" || getCookie("lc_uid") === "") && window.location.hash != "/login") {
-        window.location.hash = "/login";
-    }
-    */
 
 	const [dropen, setDropen] = React.useState(false);
 	const handleDrawerOpen = () => {
@@ -586,71 +540,67 @@ export default function App(props) {
 
 	return (
 		<React.Fragment>
-			<SnackbarProvider maxSnack={5} autoHideDuration={2000}>
-				<ThemeProvider theme={theme}>
-					<CssBaseline />
-					<AppBar position="sticky" className={classes.appBar}>
-						<Toolbar>
-							<IconButton
-								edge="start"
-								className={classes.menuButton}
-								color="inherit"
-								aria-label="Home"
-								onClick={handleDrawerOpen}
-							>
-								<MenuIcon />
-							</IconButton>
-							<Typography variant="h5">
-								{lc_config.title}
-							</Typography>
-						</Toolbar>
-					</AppBar>
-					<Toolbar id="back-to-top-anchor" />
-					<Drawer
-						className={classes.drawer}
-						classes={{ paper: classes.drawerPaper }}
-						anchor="left"
-						open={dropen}
-						onClose={handleDrawerClose}
-						onClick={handleDrawerClose}
+			<ThemeProvider theme={theme}>
+				<CssBaseline />
+				<AppBar position="sticky" className={classes.appBar}>
+					<Toolbar>
+						<IconButton
+							edge="start"
+							className={classes.menuButton}
+							color="inherit"
+							aria-label="Home"
+							onClick={handleDrawerOpen}
+						>
+							<MenuIcon />
+						</IconButton>
+						<Typography variant="h5">{lc_config.title}</Typography>
+					</Toolbar>
+				</AppBar>
+				<Toolbar id="back-to-top-anchor" />
+				<Drawer
+					className={classes.drawer}
+					classes={{ paper: classes.drawerPaper }}
+					anchor="left"
+					open={dropen}
+					onClose={handleDrawerClose}
+					onClick={handleDrawerClose}
+				>
+					<LeftBar />
+				</Drawer>
+				<Container id="chatarea" className={classes.content}>
+					<ChatView
+						{...props}
+						endpoint={lc_config.endpoint}
+						chatroom={room}
+					/>
+					<br />
+					<ChatForm
+						{...props}
+						endpoint={lc_config.endpoint}
+						chatroom={room}
+						className={classes.chatForm}
+					/>
+					<Toolbar id="top-to-back-anchor" />
+				</Container>
+				<ScrollBtn direction="back" {...props}>
+					<Fab
+						color="secondary"
+						size="small"
+						aria-label="scroll to bottom"
 					>
-						<LeftBar />
-					</Drawer>
-					<Container id="chatarea" className={classes.content}>
-						<ChatView
-							{...props}
-							endpoint={lc_config.endpoint}
-							chatroom={room}
-						/>
-						<br />
-						<ChatForm
-							{...props}
-							endpoint={lc_config.endpoint}
-							chatroom={room}
-							className={classes.chatForm}
-						/>
-						<Toolbar id="top-to-back-anchor" />
-					</Container>
-					<ScrollBtn direction="back" {...props}>
-						<Fab
-							color="secondary"
-							size="small"
-							aria-label="scroll to bottom"
-						>
-							<KeyboardArrowDownIcon />
-						</Fab>
-					</ScrollBtn>
-					<ScrollBtn direction="top" {...props}>
-						<Fab
-							color="secondary"
-							size="small"
-							aria-label="scroll back to top"
-						>
-							<KeyboardArrowUpIcon />
-						</Fab>
-					</ScrollBtn>
-				</ThemeProvider>
-			</SnackbarProvider>
+						<KeyboardArrowDownIcon />
+					</Fab>
+				</ScrollBtn>
+				<ScrollBtn direction="top" {...props}>
+					<Fab
+						color="secondary"
+						size="small"
+						aria-label="scroll back to top"
+					>
+						<KeyboardArrowUpIcon />
+					</Fab>
+				</ScrollBtn>
+			</ThemeProvider>
 		</React.Fragment>
 	);
 }

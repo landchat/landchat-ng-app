@@ -15,7 +15,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import HomeIcon from "@material-ui/icons/Home";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Welcome(props) {
 	const classes = useStyles();
 	const theme = useTheme();
+	const history = useHistory();
 
 	const [login, setLogin] = useState(0);
 
@@ -81,7 +82,7 @@ export default function Welcome(props) {
 							color="inherit"
 							aria-label="menu"
 							onClick={() => {
-								window.location.hash = "/";
+								history.push("/");
 							}}
 						>
 							<HomeIcon />
@@ -119,9 +120,10 @@ export default function Welcome(props) {
 												"#roomselect-input"
 											).value;
 										if (roomname !== "") {
-											window.location.hash =
+											history.push(
 												"/chat/" +
-												encodeURIComponent(roomname);
+													encodeURIComponent(roomname)
+											);
 											let rrobject = JSON.parse(
 												localStorage.recentRoom
 											);

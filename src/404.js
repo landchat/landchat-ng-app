@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import HomeIcon from "@material-ui/icons/Home";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -37,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
 export default function NotFound(props) {
 	const classes = useStyles();
 	const theme = useTheme();
+	const history = useHistory();
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
@@ -49,7 +50,7 @@ export default function NotFound(props) {
 							color="inherit"
 							aria-label="menu"
 							onClick={() => {
-								window.location.hash = "/";
+								history.push("/");
 							}}
 						>
 							<HomeIcon />
