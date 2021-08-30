@@ -2,6 +2,7 @@ import lc_config from "./config";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
+import Latex from "react-latex";
 import {
 	AppBar,
 	Toolbar,
@@ -20,10 +21,11 @@ import {
 	Divider,
 	ThemeProvider,
 	LinearProgress,
+	CircularProgress,
 	TextField,
 	Button,
 	Drawer,
-	ListItemIcon,
+	ListItemIcon
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -39,32 +41,32 @@ const useStyles = makeStyles((theme) => ({
 		display: "flex",
 		position: "fixed",
 		bottom: theme.spacing(2),
-		right: theme.spacing(2),
+		right: theme.spacing(2)
 	},
 	menuButton: {
-		marginRight: theme.spacing(2),
+		marginRight: theme.spacing(2)
 	},
 	title: {
-		flexGrow: 1,
+		flexGrow: 1
 	},
 	chatForm: {},
 	appBar: {
-		zIndex: theme.zIndex.drawer + 1,
+		zIndex: theme.zIndex.drawer + 1
 	},
 	drawer: {
 		width: 300,
-		flexShrink: 0,
+		flexShrink: 0
 	},
 	drawerPaper: {
-		width: 300,
+		width: 300
 	},
 	drawerContainer: {
-		overflow: "auto",
+		overflow: "auto"
 	},
 	content: {
 		flexGrow: 1,
-		padding: theme.spacing(3),
-	},
+		padding: theme.spacing(3)
+	}
 }));
 
 function ChatView(props) {
@@ -78,6 +80,17 @@ function ChatView(props) {
 		enqueueSnackbar(words, { variant });
 	};
 
+	function getCookie(cname) {
+		var name = cname + "=";
+		var ca = document.cookie.split(";");
+		for (var i = 0; i < ca.length; i++) {
+			var c = ca[i].trim();
+			if (c.indexOf(name) === 0)
+				return c.substring(name.length, c.length);
+		}
+		return "";
+	}
+	
 	function updateMsg(content, firsttime) {
 		try {
 			setMsgs(content);
@@ -86,7 +99,7 @@ function ChatView(props) {
 				if (anchor) {
 					anchor.scrollIntoView({
 						behavior: "smooth",
-						block: "center",
+						block: "center"
 					});
 				}
 				handleInform("Welcome to chatroom: " + chatroom, "success");
@@ -112,10 +125,12 @@ function ChatView(props) {
 				"room=" +
 				encodeURIComponent(chatroom) +
 				"&lastid=" +
-				encodeURIComponent(lastid),
+				encodeURIComponent(lastid) +
+				"&qwq=" +
+				encodeURIComponent(getCookie("qwq")),
 			headers: new Headers({
-				"Content-Type": "application/x-www-form-urlencoded",
-			}),
+				"Content-Type": "application/x-www-form-urlencoded"
+			})
 		})
 			.then((res) => res.json())
 			.catch((error) => handleInform("Fetch failed: " + error, "error"))
@@ -149,7 +164,7 @@ function ChatView(props) {
 				" " +
 				date.getHours() +
 				":" +
-				date.getMinutes(),
+				date.getMinutes()
 		});
 		/*
 		            				        let rrobject_raw=JSON.parse(localStorage.recentRoom);
@@ -191,6 +206,8 @@ function ChatView(props) {
 function ChatForm(props) {
 	const { enqueueSnackbar } = useSnackbar();
 	const { endpoint, chatroom } = props;
+	const [imgupl, setImgupl] = useState(0);
+
 	function getCookie(cname) {
 		var name = cname + "=";
 		var ca = document.cookie.split(";");
@@ -215,7 +232,7 @@ function ChatForm(props) {
 		msgData.append("app_id", "aI5qE5eL0gH1bD1pQ5tC1dC0cD0bF1");
 		fetch(endpoint + "/message_send", {
 			method: "POST",
-			body: msgData,
+			body: msgData
 		})
 			.then((res) => res.text())
 			.catch((error) => handleInform("Fetch failed: " + error, "error"))
@@ -244,7 +261,7 @@ function ChatForm(props) {
 		msgData.append("app_id", "aI5qE5eL0gH1bD1pQ5tC1dC0cD0bF1");
 		fetch(endpoint + "/message_send", {
 			method: "POST",
-			body: msgData,
+			body: msgData
 		})
 			.then((res) => res.text())
 			.catch((error) => handleInform("Fetch failed: " + error, "error"))
@@ -257,6 +274,7 @@ function ChatForm(props) {
 			});
 	}
 	function handlePicUpload() {
+		setImgupl(1);
 		var imgFiles = document.querySelector("#upload-pic").files;
 		var picData = new FormData();
 		picData.append("from", lc_config.title);
@@ -264,13 +282,13 @@ function ChatForm(props) {
 
 		fetch("https://pic.hywiki.xyz/api/upload", {
 			method: "POST",
-			body: picData,
+			body: picData
 		})
 			.then((res) => res.json())
 			.catch((error) => handleInform("Fetch failed: " + error, "error"))
 			.then(function (response) {
 				if (response.code / 100 === 2) {
-					handleInform("Image uploaded!", "success");
+					//handleInform("Image uploaded!", "success");
 					sendPicHandler(response.data.url);
 				} else {
 					handleInform(
@@ -278,6 +296,7 @@ function ChatForm(props) {
 						"error"
 					);
 				}
+				setImgupl(0);
 			});
 	}
 
@@ -321,6 +340,10 @@ function ChatForm(props) {
 						<ImageIcon />
 					</IconButton>
 				</label>
+				<CircularProgress
+					size={20}
+					style={!imgupl ? { display: "none" } : {}}
+				/>
 			</form>
 		</div>
 	);
@@ -352,7 +375,7 @@ function MsgView(props) {
 					color="textPrimary"
 					style={{ whiteSpace: "pre-wrap" }}
 				>
-					{data.content}
+					<Latex>{data.content}</Latex>
 					<br />
 				</Typography>
 			</React.Fragment>
@@ -418,7 +441,7 @@ function ScrollBtn(props) {
 	var tri = useScrollTrigger({
 		target: window ? window() : undefined,
 		disableHysteresis: true,
-		threshold: 250,
+		threshold: 250
 	});
 	if (direction === "back") {
 		tri = !tri;
@@ -450,7 +473,7 @@ function ScrollBtn(props) {
 
 ScrollBtn.propTypes = {
 	children: PropTypes.element.isRequired,
-	window: PropTypes.func,
+	window: PropTypes.func
 };
 
 function LeftBar(props) {
@@ -503,7 +526,7 @@ function LeftBar(props) {
 											style={{
 												backgroundColor: avatarColor(
 													v.name
-												),
+												)
 											}}
 										>
 											{v.name.substr(0, 2)}
@@ -563,7 +586,7 @@ export default function App(props) {
 
 	return (
 		<React.Fragment>
-			<SnackbarProvider maxSnack={5} autoHideDuration={3000}>
+			<SnackbarProvider maxSnack={5} autoHideDuration={2000}>
 				<ThemeProvider theme={theme}>
 					<CssBaseline />
 					<AppBar position="sticky" className={classes.appBar}>
@@ -577,7 +600,9 @@ export default function App(props) {
 							>
 								<MenuIcon />
 							</IconButton>
-							<Typography variant="h5">{lc_config.title}</Typography>
+							<Typography variant="h5">
+								{lc_config.title}
+							</Typography>
 						</Toolbar>
 					</AppBar>
 					<Toolbar id="back-to-top-anchor" />

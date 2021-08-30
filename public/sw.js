@@ -1,13 +1,17 @@
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw-main.js')
-            .then(function (registration) {
-                // 注册成功
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            })
-            .catch(function (err) {
-                // 注册失败
-                console.log('ServiceWorker registration failed: ', err);
-            });
-    });
+if ("serviceWorker" in navigator) {
+	window.addEventListener("load", function () {
+		navigator.serviceWorker
+			.register("sw-main.js")
+			.then(function (registration) {
+				// 注册成功
+				console.log(
+					"ServiceWorker registration successful with scope: ",
+					registration.scope
+				);
+			})
+			.catch(function (err) {
+				// 注册失败
+				console.log("ServiceWorker registration failed: ", err);
+			});
+	});
 }

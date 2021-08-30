@@ -5,6 +5,7 @@ import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import App from "./App";
 import Welcome from "./Welcome";
 import Login from "./Login";
+import Signup from "./Signup";
 import NotFound from "./404";
 
 import { ThemeProvider, createTheme } from "@material-ui/core/styles";
@@ -21,8 +22,8 @@ const theme = createTheme({
 	palette: {
 		type: "dark",
 		primary: blue,
-		secondary: teal,
-	},
+		secondary: teal
+	}
 });
 
 const rootElement = document.getElementById("root");
@@ -32,7 +33,8 @@ ReactDOM.render(
 			<Router>
 				<Switch>
 					<Route path="/" exact component={Welcome} />
-					<Route path="/login" component={Login} />
+					<Route path="/user/login" component={Login} />
+					<Route path="/user/signup" component={Signup} />
 					<Route path="/chat/:room" component={App} />
 					<Route path="*" component={NotFound} />
 				</Switch>

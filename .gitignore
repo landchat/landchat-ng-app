@@ -12,7 +12,7 @@
 /build
 
 # deprecated
-/src/deprecated
+/src/Deprecated
 
 # misc
 .DS_Store

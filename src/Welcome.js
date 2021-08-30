@@ -11,10 +11,9 @@ import {
 	IconButton,
 	FormControl,
 	TextField,
-	Button,
+	Button
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import swal from "sweetalert";
 import HomeIcon from "@material-ui/icons/Home";
 import { Link } from "react-router-dom";
 
@@ -22,17 +21,21 @@ const useStyles = makeStyles((theme) => ({
 	root: {
 		position: "fixed",
 		bottom: theme.spacing(2),
-		right: theme.spacing(2),
+		right: theme.spacing(2)
 	},
 	menuButton: {
-		marginRight: theme.spacing(2),
+		marginRight: theme.spacing(2)
 	},
 	title: {
-		flexGrow: 1,
+		flexGrow: 1
 	},
 	link: {
 		color: "hsla(0,0%,100%,.87)",
-	},
+		textDecoration: "none",
+		"&:hover": {
+			textDecoration: "underline"
+		}
+	}
 }));
 
 export default function Welcome(props) {
@@ -138,7 +141,7 @@ export default function Welcome(props) {
 													" " +
 													date.getHours() +
 													":" +
-													date.getMinutes(),
+													date.getMinutes()
 											};
 											localStorage.recentRoom =
 												JSON.stringify(rrobject);
@@ -154,52 +157,26 @@ export default function Welcome(props) {
 					<div style={{ display: login ? "none" : "block" }}>
 						<br />
 						<Typography variant="body1">
-							You haven't logged in yet. Please{" "}
-							<Link to="/login" className={classes.link}>
+							You haven't logged in yet. Please&nbsp;
+							<Link to="/user/login" className={classes.link}>
 								click here
-							</Link>{" "}
-							to login or sign up first.
+							</Link>
+							&nbsp;to login or sign up first.
 							<br />
 						</Typography>
 					</div>
 					<div>
 						<br />
-						<Typography variant="h4" component="h2">
-							公告
-						</Typography>
-						<Typography variant="body1">
-						    <br />
-							LandChat NG 更新内容
-						</Typography>
 						<Typography variant="body2">
-							版本0.3.0.dev4
-							<br />
-							<ul>
-							    <li>发送图片支持；</li>
-							    <li>Ctrl+Enter发送支持；</li>
-							    <li>深色模式；</li>
-							    <li>消息发送逻辑优化；</li>
-							    <li>边栏支持，首页去除最近聊天室；</li>
-							    <li>Bug修复。</li>
-							</ul>
-							下次更新预告: 
-							<br />
-							<ul>
-		    					<li>可以修改密码，昵称，头像；</li>
-		    					<li>消息更新间隔缩短到1s；</li>
-		    					<li>即将迎来首个稳定版本。</li>
-							</ul>
-							如果您感兴趣可以试试开发env:&nbsp;
+							Powered by{" "}
 							<a
-								href="https://dev.lc.hywiki.xyz/#/"
+								href="https://github.com/landchat/landchat-ng-app.git"
+								target="_blank"
 								className={classes.link}
 							>
-								https://dev.lc.hywiki.xyz
-							</a>
-							<br />
-							里面你可以实时看到564的开发进展，但加载慢，不稳定，可能随时会挂。
-							<br />
-							<br />
+								LandChat-NG-App
+							</a>{" "}
+							{lc_config.version}
 						</Typography>
 					</div>
 				</Container>
