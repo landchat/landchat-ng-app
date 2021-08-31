@@ -37,35 +37,35 @@ yarn build
 静态文件将会生成在`/build`目录下。
 
 ## 使用到的技术
-<<<<<<< HEAD
-前端，由ES6编写，通过create-react-app脚手架搭建，使用React框架，@material-ui组件库，React-router路由系统，Babel编译，webpack打包。
-后端，即api server，使用php编写，数据库由MySQLi驱动。
-
-## 近几次更新日志
-
-### 0.3.0.dev5
-
-1. 增加一些微互动；
-2. Bug修复。
-=======
 
 前端，由 ES6 编写，通过 create-react-app 脚手架搭建，使用 React 框架，@material-ui 组件库，React-router 路由系统，Babel 编译，webpack 打包。
 后端，即 api server，使用 php 编写，数据库由 MySQLi 驱动。
 
 ## 近几次更新日志
 
+### 0.3.0.beta3
+
+1. 修正一处表述错误；
+2. 首页添加当前用户名；
+3. 图片可点击放大。
+
+### 0.3.0.beta2
+
+1. 边栏改造为所有聊天室；
+2. 注册页面改进；
+3. 使用 BrowserHistory 代替 HashHistory。
+
 ### 0.3.0.beta1
 
 1. Emoji 表情发送错误的问题，请切换 LandChat 数据库字符集为 utf8mb4；
 2. 注册功能添加；
 3. 首页样式改动；
-4. KaTeX公式渲染支持。
+4. KaTeX 公式渲染支持。
 
 ### 0.3.0.dev5
 
 1. 增加一些微互动；
 2. Bug 修复。
->>>>>>> 0.3.0.beta1
 
 ### 0.3.0.dev4
 
@@ -85,4 +85,5 @@ yarn build
 
 ### 之后更新预告:
 
-1. 消息更新间隔缩短到 1s。
+1. 消息更新间隔缩短到 1s；
+2. 用户信息修改功能添加。

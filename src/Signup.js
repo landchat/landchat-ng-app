@@ -80,7 +80,7 @@ export default function Signup(props) {
 			.then((response) => {
 				if (response === "Succeed") {
 					handleInform(
-						"You've already created an account! \nRefresh this page to start chatting.",
+						"You've already created an account! Login to start chatting.",
 						"success"
 					);
 				} else {
@@ -89,7 +89,7 @@ export default function Signup(props) {
 			});
 	}
 
-	if (getCookie("lc_debug") !== "" && getCookie("lc_uid") !== "") {
+	if (getCookie("lc_passw") !== "" && getCookie("lc_uid") !== "") {
 		history.push("/");
 	}
 
@@ -134,7 +134,7 @@ export default function Signup(props) {
 								label="User ID"
 								name="id"
 								variant="standard"
-								placeholder="Number only, 0-6 digits"
+								placeholder="Number only, 5-6 digits"
 								required
 							/>
 							&nbsp;&nbsp;&nbsp;&nbsp;
