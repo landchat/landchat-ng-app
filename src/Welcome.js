@@ -44,6 +44,7 @@ export default function Welcome(props) {
 	const history = useHistory();
 
 	const [login, setLogin] = useState(0);
+	const [uname, setUname] = useState("");
 
 	function getCookie(cname) {
 		var name = cname + "=";
@@ -54,6 +55,23 @@ export default function Welcome(props) {
 				return c.substring(name.length, c.length);
 		}
 		return "";
+	}
+
+	function getUserName() {
+		fetch(lc_config.endpoint + "/user_id2info", {
+			method: "POST",
+			body: "id=" + encodeURIComponent(getCookie("lc_uid")),
+			headers: new Headers({
+				"Content-Type": "application/x-www-form-urlencoded"
+			})
+		})
+			.then((res) => res.json())
+			.catch((error) => {
+				setUname("");
+			})
+			.then((response) => {
+				setUname(", " + response.name);
+			});
 	}
 
 	useEffect(() => {
@@ -68,6 +86,7 @@ export default function Welcome(props) {
 		if (getCookie("lc_debug").indexOf("DEBUG") != -1) {
 			setLogin(1);
 		}
+		getUserName();
 	});
 
 	return (
@@ -92,7 +111,10 @@ export default function Welcome(props) {
 				</AppBar>
 				<Toolbar id="back-to-top-anchor" />
 				<Container>
-					<Typography variant="h3" component="h1">
+					<Typography variant="body1" component="p">
+						Hello{uname}!
+					</Typography>
+					<Typography variant="h4" component="h1">
 						Welcome to LandChat!
 					</Typography>
 					<br />

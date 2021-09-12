@@ -1,5 +1,7 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow: /
-Allow: /#/login
-Allow: /#/chat/
+Allow: /
+Disallow: /user/
+Allow: /user/login
+Allow: /user/signup
+Allow: /chat/

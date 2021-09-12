@@ -78,6 +78,13 @@ const useStyles = makeStyles((theme) => ({
 	},
 	menuTitle: {
 		flexGrow: 1
+	},
+	chatBubble: {
+	    backdropFilter: `blur(5px)`,
+	    boxShadow: `0 8px 12px rgba(255,255,255,.3)`,
+	    background: `rgba(255,255,255,.5)`,
+	    borderRadius: 4,
+	    padding: 6
 	}
 }));
 
@@ -115,7 +122,7 @@ function ChatView(props) {
 					});
 				}
 				handleInform("Welcome to chatroom: " + chatroom, "success");
-				if (content.length < 1) {
+				if (content.messages.length < 1) {
 					handleInform(
 						"This chatroom doesn't exist.\nSend a message to create it.",
 						"info"
@@ -290,7 +297,7 @@ function ChatForm(props) {
 				<TextField
 					id="msginput-textarea"
 					label="Input Message"
-					placeholder="Press Ctrl+Space to send"
+					placeholder="Press Ctrl+Enter to send. LaTeX supported."
 					multiline
 					margin="normal"
 					fullWidth
@@ -334,6 +341,17 @@ function MsgView(props) {
 	const { data } = props;
 	const classes = useStyles();
 	const [imgview, setImgview] = useState(0);
+	
+	function getCookie(cname) {
+		var name = cname + "=";
+		var ca = document.cookie.split(";");
+		for (var i = 0; i < ca.length; i++) {
+			var c = ca[i].trim();
+			if (c.indexOf(name) === 0)
+				return c.substring(name.length, c.length);
+		}
+		return "";
+	}
 
 	function avatarColor(name) {
 		var str = "";
@@ -359,7 +377,7 @@ function MsgView(props) {
 
 	function renderTextMsg(data) {
 		return (
-			<React.Fragment>
+			<>
 				<Typography
 					component="span"
 					variant="body2"
@@ -369,7 +387,7 @@ function MsgView(props) {
 					<Latex>{data.content}</Latex>
 					<br />
 				</Typography>
-			</React.Fragment>
+			</>
 		);
 	}
 
@@ -424,7 +442,7 @@ function MsgView(props) {
 							{data.name.substr(0, 2)}
 						</Avatar>
 					</ListItemAvatar>
-					<ListItemText
+					<ListItemText style={(getCookie("lc_uid") === data.uid) ? {textAlign: "right"} : {textAlign: "left"}}
 						primary={data.name}
 						secondary={
 							<React.Fragment>
@@ -484,6 +502,7 @@ ScrollBtn.propTypes = {
 function LeftBar(props) {
 	const classes = useStyles();
 	const history = useHistory();
+	const [uname, setUname] = useState("");
 
 	function avatarColor(name) {
 		var str = "";
@@ -492,6 +511,35 @@ function LeftBar(props) {
 		}
 		return "#" + str.slice(1, 4);
 	}
+	function getCookie(cname) {
+		var name = cname + "=";
+		var ca = document.cookie.split(";");
+		for (var i = 0; i < ca.length; i++) {
+			var c = ca[i].trim();
+			if (c.indexOf(name) === 0)
+				return c.substring(name.length, c.length);
+		}
+		return "";
+	}
+	function getUserName() {
+		fetch(lc_config.endpoint + "/user_id2info", {
+			method: "POST",
+			body: "id=" + encodeURIComponent(getCookie("lc_uid")),
+			headers: new Headers({
+				"Content-Type": "application/x-www-form-urlencoded"
+			})
+		})
+			.then((res) => res.json())
+			.catch((error) => {
+				setUname("");
+			})
+			.then((response) => {
+				setUname(", " + response.name);
+			});
+	}
+	useEffect(() => {
+		getUserName();
+	});
 
 	return (
 		<React.Fragment>
@@ -508,6 +556,8 @@ function LeftBar(props) {
 						</ListItemIcon>
 						<ListItemText primary="Home" />
 					</ListItem>
+					<Divider />
+					<ListItem>Hello{uname}!</ListItem>
 					<Divider />
 					<ListItem>Rooms</ListItem>
 					{JSON.parse(sessionStorage.recentRoom).map((v, index) => {

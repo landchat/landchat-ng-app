@@ -1,4 +1,4 @@
-var urlsToCache = ["/", "/load.gif", "/favicon.ico", "/static/js/*.js"];
+var urlsToCache = ["/", "/load.gif", "/favicon.ico", "/static/js/"];
 
 var CACHE_NAME = "landchat-ng";
 
