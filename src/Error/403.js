@@ -1,4 +1,4 @@
-import lc_config from "./config";
+import lc_config from "../config";
 import React from "react";
 import {
 	AppBar,
@@ -61,12 +61,12 @@ export default function NotFound(props) {
 				<Toolbar id="back-to-top-anchor" />
 				<Container>
 					<Typography variant="h3" component="h1">
-						404 Not Found
+						403 Forbidden
 					</Typography>
 					<Typography variant="p">
 						Uh oh..
 						<br />
-						We cannot find the page you want.
+						You are unable to access this page.
 						<br />
 						<Link to="/" className={classes.backLink}>
 							Go back to Homepage.

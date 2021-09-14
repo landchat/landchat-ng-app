@@ -11,10 +11,20 @@ import {
 	IconButton,
 	FormControl,
 	TextField,
-	Button
+	Drawer,
+	ListItemIcon,
+	Button,
+	List,
+	ListItemText,
+	ListItem,
+	Divider
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
+import MenuIcon from "@material-ui/icons/Menu";
 import HomeIcon from "@material-ui/icons/Home";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import ChatIcon from "@material-ui/icons/Chat";
 import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -35,8 +45,146 @@ const useStyles = makeStyles((theme) => ({
 		"&:hover": {
 			textDecoration: "underline"
 		}
+	},
+	appBar: {
+		zIndex: theme.zIndex.drawer + 1
+	},
+	drawer: {
+		width: 300,
+		flexShrink: 0
+	},
+	drawerPaper: {
+		width: 300
+	},
+	drawerContainer: {
+		overflow: "auto"
 	}
 }));
+function LeftBar(props) {
+	const classes = useStyles();
+	const history = useHistory();
+	const [uname, setUname] = useState("");
+
+	function avatarColor(name) {
+		var str = "";
+		for (var i = 0; i < name.length; i++) {
+			str += parseInt(name[i].charCodeAt(0), 10).toString(16);
+		}
+		return "#" + str.slice(1, 4);
+	}
+	function getCookie(cname) {
+		var name = cname + "=";
+		var ca = document.cookie.split(";");
+		for (var i = 0; i < ca.length; i++) {
+			var c = ca[i].trim();
+			if (c.indexOf(name) === 0)
+				return c.substring(name.length, c.length);
+		}
+		return "";
+	}
+	function getUserName(uid) {
+		fetch(lc_config.endpoint + "/user_id2info", {
+			method: "POST",
+			body: "id=" + encodeURIComponent(uid),
+			headers: new Headers({
+				"Content-Type": "application/x-www-form-urlencoded"
+			})
+		})
+			.then((res) => res.json())
+			.catch((error) => {
+				setUname("");
+			})
+			.then((response) => {
+				setUname(", " + response.name);
+			});
+	}
+	useEffect(() => {
+		if (getCookie("lc_uid") !== "") {
+			getUserName(getCookie("lc_uid"));
+		}
+	});
+
+	return (
+		<React.Fragment>
+			<div className={classes.drawerContainer}>
+				<List>
+					<ListItem
+						button
+						onClick={() => {
+							history.push("/");
+						}}
+					>
+						<ListItemIcon>
+							<HomeIcon />
+						</ListItemIcon>
+						<ListItemText primary="Home" />
+					</ListItem>
+					<div
+						style={{
+							display:
+								getCookie("lc_uid") === "" ? "block" : "none"
+						}}
+					>
+						<Divider />
+						<ListItem
+							button
+							onClick={() => {
+								history.push("/user/login");
+							}}
+						>
+							<ListItemIcon>
+								<ExitToAppIcon />
+							</ListItemIcon>
+							<ListItemText primary="Login" />
+						</ListItem>
+					</div>
+					<div
+						style={{
+							display:
+								getCookie("lc_uid") !== "" ? "block" : "none"
+						}}
+					>
+						<Divider />
+						<ListItem
+							button
+							onClick={() => {
+								history.push("/user/info");
+							}}
+						>
+							<ListItemIcon>
+								<AccountCircleIcon />
+							</ListItemIcon>
+							<ListItemText primary="Update profile" />
+						</ListItem>
+						<ListItem
+							button
+							onClick={() => {
+								history.push("/user/logout");
+							}}
+						>
+							<ListItemIcon>
+								<ExitToAppIcon />
+							</ListItemIcon>
+							<ListItemText primary="Logout" />
+						</ListItem>
+					</div>
+					<Divider />
+					<ListItem
+						button
+						onClick={() => {
+							history.push("/chat/welcome");
+						}}
+					>
+						<ListItemIcon>
+							<ChatIcon />
+						</ListItemIcon>
+						<ListItemText primary="Chat" />
+					</ListItem>
+				</List>
+			</div>
+		</React.Fragment>
+	);
+}
 
 export default function Welcome(props) {
 	const classes = useStyles();
@@ -57,10 +205,10 @@ export default function Welcome(props) {
 		return "";
 	}
 
-	function getUserName() {
+	function getUserName(uid) {
 		fetch(lc_config.endpoint + "/user_id2info", {
 			method: "POST",
-			body: "id=" + encodeURIComponent(getCookie("lc_uid")),
+			body: "id=" + encodeURIComponent(uid),
 			headers: new Headers({
 				"Content-Type": "application/x-www-form-urlencoded"
 			})
@@ -70,10 +218,20 @@ export default function Welcome(props) {
 				setUname("");
 			})
 			.then((response) => {
-				setUname(", " + response.name);
+				if ("name" in response) {
+					setUname(", " + response.name);
+				} else {
+					setUname("");
+				}
 			});
 	}
-
+	const [dropen, setDropen] = React.useState(false);
+	const handleDrawerOpen = () => {
+		setDropen(true);
+	};
+	const handleDrawerClose = () => {
+		setDropen(false);
+	};
 	useEffect(() => {
 		if (typeof Storage === "undefined") {
 			alert(
@@ -86,29 +244,39 @@ export default function Welcome(props) {
 		if (getCookie("lc_debug").indexOf("DEBUG") != -1) {
 			setLogin(1);
 		}
-		getUserName();
+		if (getCookie("lc_uid") !== "") {
+			getUserName(getCookie("lc_uid"));
+		}
 	});
 
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
-				<AppBar position="sticky">
+				<AppBar position="sticky" className={classes.appBar}>
 					<Toolbar>
 						<IconButton
 							edge="start"
 							className={classes.menuButton}
 							color="inherit"
 							aria-label="menu"
-							onClick={() => {
-								history.push("/");
-							}}
+							onClick={handleDrawerOpen}
 						>
-							<HomeIcon />
+							<MenuIcon />
 						</IconButton>
 						<Typography variant="h5">{lc_config.title}</Typography>
 					</Toolbar>
 				</AppBar>
+				<Drawer
+					className={classes.drawer}
+					classes={{ paper: classes.drawerPaper }}
+					anchor="left"
+					open={dropen}
+					onClose={handleDrawerClose}
+					onClick={handleDrawerClose}
+				>
+					<LeftBar />
+				</Drawer>
 				<Toolbar id="back-to-top-anchor" />
 				<Container>
 					<Typography variant="body1" component="p">
@@ -118,62 +286,17 @@ export default function Welcome(props) {
 						Welcome to LandChat!
 					</Typography>
 					<br />
-					<div id="roomselect">
-						<Typography variant="body1" component="p">
-							Enter the name of the room you want to join:
-						</Typography>
-						<br />
+					<div id="chat-start">
 						<div>
 							<FormControl variant="outlined">
-								<TextField
-									type="text"
-									id="roomselect-input"
-									label="Room name"
-									name="roomname"
-									variant="outlined"
-									required
-								/>
 								<Button
 									variant="contained"
 									color="primary"
-									onClick={function () {
-										let roomname =
-											document.querySelector(
-												"#roomselect-input"
-											).value;
-										if (roomname !== "") {
-											history.push(
-												"/chat/" +
-													encodeURIComponent(roomname)
-											);
-											let rrobject = JSON.parse(
-												localStorage.recentRoom
-											);
-											if (rrobject.rooms.length >= 5) {
-												rrobject.rooms.shift();
-											}
-											let date = new Date();
-											rrobject.rooms[
-												rrobject.rooms.length
-											] = {
-												name: roomname,
-												date:
-													/*date.getFullYear() + "-" + */ date.getMonth() +
-													1 +
-													"-" +
-													date.getDate() +
-													" " +
-													date.getHours() +
-													":" +
-													date.getMinutes()
-											};
-											localStorage.recentRoom =
-												JSON.stringify(rrobject);
-											return false;
-										}
+									onClick={() => {
+										history.push("/chat/welcome");
 									}}
 								>
-									Join
+									Start Chatting
 								</Button>
 							</FormControl>
 						</div>

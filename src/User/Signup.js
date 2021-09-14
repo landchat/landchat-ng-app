@@ -1,4 +1,4 @@
-import lc_config from "./config";
+import lc_config from "../config";
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import {

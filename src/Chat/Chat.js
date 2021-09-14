@@ -1,4 +1,4 @@
-import lc_config from "./config";
+import lc_config from "../config";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
@@ -26,7 +26,8 @@ import {
 	Button,
 	Drawer,
 	ListItemIcon,
-	Modal
+	Modal,
+	FormControl
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -80,11 +81,11 @@ const useStyles = makeStyles((theme) => ({
 		flexGrow: 1
 	},
 	chatBubble: {
-	    backdropFilter: `blur(5px)`,
-	    boxShadow: `0 8px 12px rgba(255,255,255,.3)`,
-	    background: `rgba(255,255,255,.5)`,
-	    borderRadius: 4,
-	    padding: 6
+		backdropFilter: `blur(5px)`,
+		boxShadow: `0 8px 12px rgba(255,255,255,.3)`,
+		background: `rgba(255,255,255,.5)`,
+		borderRadius: 4,
+		padding: 6
 	}
 }));
 
@@ -296,8 +297,8 @@ function ChatForm(props) {
 				</Typography>
 				<TextField
 					id="msginput-textarea"
-					label="Input Message"
-					placeholder="Press Ctrl+Enter to send. LaTeX supported."
+					label="Input Message (LaTeX supported)"
+					placeholder="Press Ctrl+Enter to send"
 					multiline
 					margin="normal"
 					fullWidth
@@ -341,7 +342,7 @@ function MsgView(props) {
 	const { data } = props;
 	const classes = useStyles();
 	const [imgview, setImgview] = useState(0);
-	
+
 	function getCookie(cname) {
 		var name = cname + "=";
 		var ca = document.cookie.split(";");
@@ -442,7 +443,12 @@ function MsgView(props) {
 							{data.name.substr(0, 2)}
 						</Avatar>
 					</ListItemAvatar>
-					<ListItemText style={(getCookie("lc_uid") === data.uid) ? {textAlign: "right"} : {textAlign: "left"}}
+					<ListItemText
+						style={
+							getCookie("lc_uid") === data.uid
+								? { textAlign: "right" }
+								: { textAlign: "left" }
+						}
 						primary={data.name}
 						secondary={
 							<React.Fragment>
@@ -521,10 +527,10 @@ function LeftBar(props) {
 		}
 		return "";
 	}
-	function getUserName() {
+	function getUserName(uid) {
 		fetch(lc_config.endpoint + "/user_id2info", {
 			method: "POST",
-			body: "id=" + encodeURIComponent(getCookie("lc_uid")),
+			body: "id=" + encodeURIComponent(uid),
 			headers: new Headers({
 				"Content-Type": "application/x-www-form-urlencoded"
 			})
@@ -538,7 +544,9 @@ function LeftBar(props) {
 			});
 	}
 	useEffect(() => {
-		getUserName();
+		if (getCookie("lc_uid") !== "") {
+			getUserName(getCookie("lc_uid"));
+		}
 	});
 
 	return (
@@ -559,7 +567,61 @@ function LeftBar(props) {
 					<Divider />
 					<ListItem>Hello{uname}!</ListItem>
 					<Divider />
-					<ListItem>Rooms</ListItem>
+					<ListItem>Create/Join a room</ListItem>
+					<FormControl variant="outlined" style={{ marginLeft: 15 }}>
+						<TextField
+							type="text"
+							id="roomselect-input"
+							label="Room name"
+							name="roomname"
+							variant="outlined"
+							required
+							onClick={(e) => {
+								e.stopPropagation();
+							}}
+						/>
+						<Button
+							variant="contained"
+							color="primary"
+							onClick={function () {
+								let roomname =
+									document.querySelector(
+										"#roomselect-input"
+									).value;
+								if (roomname !== "") {
+									history.push(
+										"/chat/" + encodeURIComponent(roomname)
+									);
+									let rrobject = JSON.parse(
+										localStorage.recentRoom
+									);
+									if (rrobject.rooms.length >= 5) {
+										rrobject.rooms.shift();
+									}
+									let date = new Date();
+									rrobject.rooms[rrobject.rooms.length] = {
+										name: roomname,
+										date:
+											/*date.getFullYear() + "-" + */ date.getMonth() +
+											1 +
+											"-" +
+											date.getDate() +
+											" " +
+											date.getHours() +
+											":" +
+											date.getMinutes()
+									};
+									localStorage.recentRoom =
+										JSON.stringify(rrobject);
+									return false;
+								}
+							}}
+						>
+							Join
+						</Button>
+					</FormControl>
+					<Divider />
+					<ListItem>New Rooms</ListItem>
 					{JSON.parse(sessionStorage.recentRoom).map((v, index) => {
 						return (
 							<ListItem
