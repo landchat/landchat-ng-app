@@ -137,6 +137,17 @@ function LeftBar(props) {
 							</ListItemIcon>
 							<ListItemText primary="Login" />
 						</ListItem>
+						<ListItem
+							button
+							onClick={() => {
+								history.push("/user/signup");
+							}}
+						>
+							<ListItemIcon>
+								<ExitToAppIcon />
+							</ListItemIcon>
+							<ListItemText primary="Create an account" />
+						</ListItem>
 					</div>
 					<div
 						style={{

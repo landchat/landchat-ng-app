@@ -1,5 +1,5 @@
 const lc_config = {
-	version: "0.3.0.beta5-rc1",
+	version: "1.0.0",
 	title: "LandChat NG",
 	endpoint: "https://lc.hywiki.xyz/api/v1"
 };

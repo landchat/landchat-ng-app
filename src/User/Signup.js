@@ -76,7 +76,7 @@ export default function Signup(props) {
 			body: suData
 		})
 			.then((res) => res.text())
-			.catch((error) => handleInform("Sign up failed: " + error, "error"))
+			.catch((error) => handleInform("SignupError: " + error, "error"))
 			.then((response) => {
 				if (response === "Succeed") {
 					handleInform(
@@ -84,7 +84,7 @@ export default function Signup(props) {
 						"success"
 					);
 				} else {
-					handleInform("SignupError: " + response, "error");
+					handleInform("Sign up failed: " + response, "error");
 				}
 			});
 	}

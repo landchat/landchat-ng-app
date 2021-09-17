@@ -290,7 +290,7 @@ function ChatForm(props) {
 	}
 
 	return (
-		<div>
+		<div style={{ display: ((getCookie("lc_uid") === "" || getCookie("lc_passw") === "") ? "none" : "block") }}>
 			<form id="msginput-form">
 				<Typography variant="body1">
 					Send message at chatroom: {chatroom}

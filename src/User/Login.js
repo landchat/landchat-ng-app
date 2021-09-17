@@ -10,11 +10,13 @@ import {
 	Container,
 	IconButton,
 	TextField,
-	Button
+	Button,
+	FormControl
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import HomeIcon from "@material-ui/icons/Home";
 import { Link, useHistory } from "react-router-dom";
+import { useSnackbar } from "notistack";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -41,6 +43,8 @@ export default function Login(props) {
 	const classes = useStyles();
 	const theme = useTheme();
 	const history = useHistory();
+	
+	const { enqueueSnackbar } = useSnackbar();
 
 	function getCookie(cname) {
 		var name = cname + "=";
@@ -51,6 +55,42 @@ export default function Login(props) {
 				return c.substring(name.length, c.length);
 		}
 		return "";
+	}
+	
+	function setCookie(cname,cvalue,exdays) {
+        var d = new Date();
+        d.setTime(d.getTime()+(exdays*24*60*60*1000));
+        var expires = "expires="+d.toGMTString();
+        document.cookie = cname + "=" + cvalue + "; " + expires;
+    }
+    
+    const handleInform = function (words, variant) {
+		enqueueSnackbar(words, { variant });
+	};
+	
+	function handleLogin() {
+	    let msgData = new FormData();
+	    let lusr = document.querySelector("#login-user").value;
+	    let lpwd = document.querySelector("#login-pswd").value;
+		msgData.append("id", lusr);
+		msgData.append("pwd", lpwd);
+		fetch(lc_config.endpoint + "/user_checkpwd", {
+			method: "POST",
+			body: msgData
+		})
+			.then((res) => res.json())
+			.catch((error) => handleInform("Fetch failed: " + error, "error"))
+			.then(function (response) {
+				if (!response.result) {
+					handleInform("Incorrect username or password", "error");
+				} else {
+					handleInform("You are logged in!", "success");
+					setCookie("lc_debug", "DEBUG" + Math.random(1000000, 9999999));
+					setCookie("lc_uid", lusr);
+					setCookie("lc_passw", lpwd);
+					history.push("/");
+				}
+			});
 	}
 
 	if (getCookie("lc_passw") !== "" && getCookie("lc_uid") !== "") {
@@ -82,7 +122,7 @@ export default function Login(props) {
 					<Typography variant="h3" component="h1">
 						Login
 					</Typography>
-					<form
+					<FormControl
 						noValidate
 						autoComplete="off"
 						action={lc_config.endpoint + "/user_login"}
@@ -92,12 +132,11 @@ export default function Login(props) {
 						<TextField
 							type="text"
 							id="login-user"
-							label="User name or User ID"
+							label="User ID"
 							name="usr"
 							variant="outlined"
 							required
 						/>
-						<br />
 						<br />
 						<TextField
 							type="password"
@@ -108,17 +147,17 @@ export default function Login(props) {
 							required
 						/>
 						<br />
-						<br />
 						<Button
 							id="login-btn"
 							variant="contained"
 							color="primary"
 							type="submit"
+							onClick={handleLogin}
 						>
 							Login
 						</Button>
-					</form>
-					<br />
+					</FormControl>
+					<br /><br />
 					<Typography component="p">
 						If you don't have an account, please&nbsp;
 						<Link to="/user/signup" className={classes.signupLink}>

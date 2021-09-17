@@ -110,7 +110,7 @@ export default function UserInfo(props) {
 				<Toolbar id="back-to-top-anchor" />
 				<Container>
 					<Typography variant="h3" component="h1">
-						Update your information
+						Update your profile
 					</Typography>
 					<br />
 					<FormControl
