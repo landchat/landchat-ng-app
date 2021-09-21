@@ -27,15 +27,14 @@ import {
 	Drawer,
 	ListItemIcon,
 	Modal,
-	FormControl,
-	Skeleton
+	FormControl
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
-import AddCommentIcon from "@material-ui/icons/AddComment";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import HomeIcon from "@material-ui/icons/Home";
 import MenuIcon from "@material-ui/icons/Menu";
-import AddAPhotoIcon from "@material-ui/icons/AddAPhoto";
+import ImageIcon from "@material-ui/icons/Image";
 import { useSnackbar } from "notistack";
 import { Link, useHistory } from "react-router-dom";
 
@@ -81,13 +80,6 @@ const useStyles = makeStyles((theme) => ({
 	menuTitle: {
 		flexGrow: 1
 	},
-	link: {
-		color: "hsla(0,0%,100%,.87)",
-		textDecoration: "none",
-		"&:hover": {
-			textDecoration: "underline"
-		}
-	},
 	chatBubble: {
 		backdropFilter: `blur(5px)`,
 		boxShadow: `0 8px 12px rgba(255,255,255,.3)`,
@@ -121,7 +113,14 @@ function ChatView(props) {
 
 	function updateMsg(content, firsttime) {
 		try {
-			setMsgs(content);
+			if (firsttime) {
+				setMsgs(content);
+			} else {
+				setMsgs((rmsgs) => {
+					rmsgs.messages = rmsgs.messages.concat(content.messages);
+					return rmsgs;
+				});
+			}
 			if (firsttime !== 0) {
 				const anchor = document.querySelector("#top-to-back-anchor");
 				if (anchor) {
@@ -146,6 +145,11 @@ function ChatView(props) {
 	function loadRoom(firsttime) {
 		//alert(JSON.stringify(msgsRef.current));
 		var lastid = -1;
+		if (msgsRef.current.messages.length > 0) {
+			lastid =
+				msgsRef.current.messages[msgsRef.current.messages.length - 1]
+					.msgid;
+		}
 		setLoad(1);
 
 		fetch(endpoint + "/message_view", {
@@ -165,20 +169,29 @@ function ChatView(props) {
 			.catch((error) => handleInform("Fetch failed: " + error, "error"))
 			.then((response) => updateMsg(response, firsttime))
 			.then(function () {
+				alert(JSON.stringify(msgsRef.current));
 				setTimeo(
 					setTimeout(function () {
 						loadRoom(0);
-					}, 5000)
+					}, 3000)
 				);
 			});
 	}
 
 	useEffect(() => {
 		if (timeo !== -1) {
-			clearTimeout(timeo);
+			if (clearTimeout(timeo)) {
+				alert("Timeout cleared: " + timeo);
+			}
 		}
 		loadRoom(1);
 	}, [chatroom]);
+
+	const msgsRef = useRef(msgs);
+
+	useEffect(() => {
+		msgsRef.current = msgs;
+	}, [msgs]);
 
 	return (
 		<div>
@@ -187,26 +200,6 @@ function ChatView(props) {
 					return <MsgView key={v.msgid} data={v}></MsgView>;
 				})}
 			</List>
-			{/*
-			<div>
-				<ListItem alignItems="flex-start">
-					<ListItemAvatar>
-						<Avatar color="secondary">
-							
-						</Avatar>
-					</ListItemAvatar>
-			 		<ListItemText
-						primary="Loading..."
-						secondary={
-							<React.Fragment>
-								Loading...
-							</React.Fragment>
-						}
-					/>
-				</ListItem>
-				<Divider variant="inset" component="li" />
-			</div>
-		    */	}
 			<LinearProgress style={{ display: load ? "block" : "none" }} />
 		</div>
 	);
@@ -353,7 +346,7 @@ function ChatForm(props) {
 						aria-label="upload picture"
 						component="span"
 					>
-						<AddAPhotoIcon />
+						<ImageIcon />
 					</IconButton>
 				</label>
 				<CircularProgress
@@ -369,11 +362,6 @@ function MsgView(props) {
 	const { data } = props;
 	const classes = useStyles();
 	const [imgview, setImgview] = useState(0);
-	const { enqueueSnackbar } = useSnackbar();
-
-	const handleInform = function (words, variant) {
-		enqueueSnackbar(words, { variant });
-	};
 
 	function getCookie(cname) {
 		var name = cname + "=";
@@ -385,6 +373,28 @@ function MsgView(props) {
 		}
 		return "";
 	}
+
+	function avatarColor(name) {
+		var str = "";
+		for (var i = 0; i < name.length; i++) {
+			str += parseInt(name[i].charCodeAt(0), 10).toString(16);
+		}
+		return "#" + str.slice(1, 4);
+		/*
+		var colorCode = str.slice(1, 4);
+		var colorCode_Light = "";
+		for (var i = 0; i < colorCode.length; i++) {
+		    console.log("ccl: i=" + i + " cc[i]=" + colorCode[i] + " ccl[i]=" + Math.floor(parseInt(colorCode[i].charCodeAt(0), 16)));
+		    colorCode_Light += (15 - Math.floor(parseInt(colorCode[i].charCodeAt(0), 16) / 2)).toString(16);
+		}
+		return "#" + colorCode_Light;
+		*/
+	}
+	/*
+	useEffect(() => {
+	    MathJax.Hub.Queue(["Typeset", MathJax.Hub, ReactDOM.findDOMNode(this)]);
+	}, [data.msg]);
+	*/
 
 	function renderTextMsg(data) {
 		return (
@@ -427,29 +437,6 @@ function MsgView(props) {
 				return <React.Fragment>???</React.Fragment>;
 		}
 	}
-	
-	function handleRecall() {
-	    var msgid = data.msgid;
-	    var rmData = new FormData();
-	    rmData.append("id", getCookie("lc_uid"));
-	    rmData.append("pwd", getCookie("lc_passw"));
-	    rmData.append("msgid", msgid);
-		fetch(lc_config.endpoint + "/message_recall", {
-			method: "POST",
-			body: rmData
-		})
-			.then((res) => res.json())
-			.catch((error) => {
-				handleInform("Recall error: " + error, "error");
-			})
-			.then((response) => {
-			    if (response.result / 100 === 2) {
-				    handleInform(response.msg, "success");
-			    } else {
-			        handleInform(response.msg, "error");
-			    }
-			});
-	}
 
 	return (
 		<React.Fragment>
@@ -469,7 +456,10 @@ function MsgView(props) {
 			<div data-msgid={data.msgid}>
 				<ListItem alignItems="flex-start">
 					<ListItemAvatar>
-						<Avatar src={data.picurl} color="secondary">
+						<Avatar
+							src={data.picurl}
+							style={{ backgroundColor: avatarColor(data.name) }}
+						>
 							{data.name.substr(0, 2)}
 						</Avatar>
 					</ListItemAvatar>
@@ -483,19 +473,7 @@ function MsgView(props) {
 						secondary={
 							<React.Fragment>
 								{renderMsg(data)}
-								{data.time + " @ " + data.app + " "}
-								<a
-									style={
-										getCookie("lc_uid") === data.uid
-											? {}
-											: { display: "none" }
-									}
-									href="#"
-									onClick={handleRecall}
-									className={classes.link}
-								>
-									| Recall
-								</a>
+								{data.time + " @ " + data.app}
 							</React.Fragment>
 						}
 					/>
@@ -553,6 +531,13 @@ function LeftBar(props) {
 	const [uname, setUname] = useState("");
 	const [roomall, setRoomall] = useState([]);
 
+	function avatarColor(name) {
+		var str = "";
+		for (var i = 0; i < name.length; i++) {
+			str += parseInt(name[i].charCodeAt(0), 10).toString(16);
+		}
+		return "#" + str.slice(1, 4);
+	}
 	function getCookie(cname) {
 		var name = cname + "=";
 		var ca = document.cookie.split(";");
@@ -661,7 +646,11 @@ function LeftBar(props) {
 								}}
 							>
 								<ListItemAvatar>
-									<Avatar color="secondary">
+									<Avatar
+										style={{
+											backgroundColor: avatarColor(v)
+										}}
+									>
 										{v.substr(0, 2)}
 									</Avatar>
 								</ListItemAvatar>
@@ -755,7 +744,7 @@ export default function App(props) {
 						size="small"
 						aria-label="scroll to bottom"
 					>
-						<AddCommentIcon />
+						<KeyboardArrowDownIcon />
 					</Fab>
 				</ScrollBtn>
 				<ScrollBtn direction="top" {...props}>

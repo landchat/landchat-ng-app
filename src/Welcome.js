@@ -23,6 +23,7 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import MenuIcon from "@material-ui/icons/Menu";
 import HomeIcon from "@material-ui/icons/Home";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import ChatIcon from "@material-ui/icons/Chat";
 import { Link, useHistory } from "react-router-dom";
@@ -144,7 +145,7 @@ function LeftBar(props) {
 							}}
 						>
 							<ListItemIcon>
-								<ExitToAppIcon />
+								<AddCircleIcon />
 							</ListItemIcon>
 							<ListItemText primary="Create an account" />
 						</ListItem>

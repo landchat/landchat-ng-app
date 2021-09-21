@@ -38,18 +38,18 @@ export default function Logout(props) {
 	const classes = useStyles();
 	const theme = useTheme();
 	const history = useHistory();
-	
-	function setCookie(cname,cvalue,exdays) {
-        var d = new Date();
-        d.setTime(d.getTime()+(exdays*24*60*60*1000));
-        var expires = "expires="+d.toGMTString();
-        document.cookie = cname + "=" + cvalue + "; " + expires;
-    }
-	
+
+	function setCookie(cname, cvalue, exdays) {
+		var d = new Date();
+		d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+		var expires = "expires=" + d.toGMTString();
+		document.cookie = cname + "=" + cvalue + "; " + expires;
+	}
+
 	useEffect(() => {
-	    setCookie("lc_debug", "", 0);
-	    setCookie("lc_uid", "", 0);
-	    setCookie("lc_passw", "", 0);
+		setCookie("lc_debug", "", 0);
+		setCookie("lc_uid", "", 0);
+		setCookie("lc_passw", "", 0);
 	});
 
 	return (
