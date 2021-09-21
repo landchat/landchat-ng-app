@@ -12,10 +12,12 @@
 
 ## 使用
 
+注意: 本项目依赖于 yarn 包管理器，因此请先安装 yarn（`npm install -g yarn`）。
+
 ### 安装
 
 ```bash
-npm install
+yarn
 ```
 
 然后，请您查阅代码，修改`src/config.js`文件中的`title`和`endpoint`选项为您自己的。
@@ -42,6 +44,12 @@ yarn build
 后端，即 api server，使用 php 编写，数据库由 MySQLi 驱动。
 
 ## 近几次更新日志
+
+### 1.0.2
+
+1. 消息撤回确认；
+2. 深色模式跟随系统；
+3. 修复一处连续请求的bug。
 
 ### 1.0.1
 

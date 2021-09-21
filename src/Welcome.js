@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 		flexGrow: 1
 	},
 	link: {
-		color: "hsla(0,0%,100%,.87)",
+		color: `#bdbdbd`,
 		textDecoration: "none",
 		"&:hover": {
 			textDecoration: "underline"

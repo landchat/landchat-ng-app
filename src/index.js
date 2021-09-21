@@ -22,9 +22,13 @@ if (!localStorage.recentRoom) {
 //setRecentRoom(JSON.parse(localStorage.recentRoom));
 //}, [localStorage.recentRoom]);
 
+const prefersDarkMode = window.matchMedia(
+	"(prefers-color-scheme: dark)"
+).matches;
+
 const theme = createTheme({
 	palette: {
-		type: "dark",
+		type: prefersDarkMode ? "dark" : "light",
 		primary: blue,
 		secondary: teal
 	}

@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
 		flexGrow: 1
 	},
 	link: {
-		color: "hsla(0,0%,100%,.87)",
+		color: `#9e9e9e`,
 		textDecoration: "none",
 		"&:hover": {
 			textDecoration: "underline"
@@ -206,7 +206,7 @@ function ChatView(props) {
 				</ListItem>
 				<Divider variant="inset" component="li" />
 			</div>
-		    */	}
+		    */}
 			<LinearProgress style={{ display: load ? "block" : "none" }} />
 		</div>
 	);
@@ -369,10 +369,13 @@ function MsgView(props) {
 	const { data } = props;
 	const classes = useStyles();
 	const [imgview, setImgview] = useState(0);
-	const { enqueueSnackbar } = useSnackbar();
+	const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
 	const handleInform = function (words, variant) {
-		enqueueSnackbar(words, { variant });
+		return enqueueSnackbar(words, { variant });
+	};
+	const handleInformWithAction = function (words, variant, action) {
+		return enqueueSnackbar(words, { variant, action });
 	};
 
 	function getCookie(cname) {
@@ -427,13 +430,13 @@ function MsgView(props) {
 				return <React.Fragment>???</React.Fragment>;
 		}
 	}
-	
+
 	function handleRecall() {
-	    var msgid = data.msgid;
-	    var rmData = new FormData();
-	    rmData.append("id", getCookie("lc_uid"));
-	    rmData.append("pwd", getCookie("lc_passw"));
-	    rmData.append("msgid", msgid);
+		var msgid = data.msgid;
+		var rmData = new FormData();
+		rmData.append("id", getCookie("lc_uid"));
+		rmData.append("pwd", getCookie("lc_passw"));
+		rmData.append("msgid", msgid);
 		fetch(lc_config.endpoint + "/message_recall", {
 			method: "POST",
 			body: rmData
@@ -443,12 +446,22 @@ function MsgView(props) {
 				handleInform("Recall error: " + error, "error");
 			})
 			.then((response) => {
-			    if (response.result / 100 === 2) {
-				    handleInform(response.msg, "success");
-			    } else {
-			        handleInform(response.msg, "error");
-			    }
+				if (response.result / 100 === 2) {
+					handleInform(response.msg, "success");
+				} else {
+					handleInform(response.msg, "error");
+				}
 			});
+	}
+
+	function handleRecallBtn() {
+		handleInformWithAction(
+			"Sure to recall message " + data.msgid + "?",
+			"warning",
+			<React.Fragment>
+				<Button onClick={handleRecall}>Yes</Button>
+			</React.Fragment>
+		);
 	}
 
 	return (
@@ -491,7 +504,7 @@ function MsgView(props) {
 											: { display: "none" }
 									}
 									href="#"
-									onClick={handleRecall}
+									onClick={handleRecallBtn}
 									className={classes.link}
 								>
 									| Recall
@@ -589,7 +602,7 @@ function LeftBar(props) {
 		if (getCookie("lc_uid") !== "") {
 			getUserName(getCookie("lc_uid"));
 		}
-	});
+	}, []);
 
 	return (
 		<React.Fragment>
