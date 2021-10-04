@@ -41,10 +41,13 @@ import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
-		display: "flex",
-		position: "fixed",
+		display: `flex`,
+		position: `fixed`,
 		bottom: theme.spacing(2),
 		right: theme.spacing(2)
+	},
+	chatWrap: {
+		minHeight: `calc(100vh)`
 	},
 	menuButton: {
 		marginRight: theme.spacing(2)
@@ -52,9 +55,13 @@ const useStyles = makeStyles((theme) => ({
 	title: {
 		flexGrow: 1
 	},
-	chatForm: {},
 	appBar: {
 		zIndex: theme.zIndex.drawer + 1
+	},
+	chatView: {
+		maxHeight: `calc(100vh - 240px)` /*100vh - 64px - 24px - 128px - 24px*/,
+		overflowY: `auto`,
+		overflowX: `hidden`
 	},
 	drawer: {
 		width: 300,
@@ -64,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
 		width: 300
 	},
 	drawerContainer: {
-		overflow: "auto"
+		overflow: `auto`
 	},
 	content: {
 		flexGrow: 1,
@@ -99,6 +106,7 @@ const useStyles = makeStyles((theme) => ({
 
 function ChatView(props) {
 	const { endpoint, chatroom } = props;
+	const classes = useStyles();
 	const [msgs, setMsgs] = useState({ messages: [] });
 	const [load, setLoad] = useState(0);
 	const [timeo, setTimeo] = useState(-1);
@@ -121,15 +129,12 @@ function ChatView(props) {
 
 	function updateMsg(content, firsttime) {
 		try {
+			const chatviewDiv = document.getElementById("chatview");
+			let oldSH = chatviewDiv.scrollHeight;
 			setMsgs(content);
-			if (firsttime !== 0) {
-				const anchor = document.querySelector("#top-to-back-anchor");
-				if (anchor) {
-					anchor.scrollIntoView({
-						behavior: "smooth",
-						block: "center"
-					});
-				}
+			if (firsttime) {
+				const chatviewDiv = document.getElementById("chatview");
+				chatviewDiv.scrollTop = chatviewDiv.scrollHeight;
 				handleInform("Welcome to chatroom: " + chatroom, "success");
 				if (content.messages.length < 1) {
 					handleInform(
@@ -137,16 +142,22 @@ function ChatView(props) {
 						"info"
 					);
 				}
+			} else {
+				if (chatviewDiv.scrollTop === oldSH) {
+					chatviewDiv.scrollTop = chatviewDiv.scrollHeight;
+				}
 			}
 		} catch (e) {
-			handleInform("Failed to decode message: " + e, "error");
+			console.error("Failed to decode message: " + e, "error");
 		}
 		setLoad(0);
 	}
 	function loadRoom(firsttime) {
 		//alert(JSON.stringify(msgsRef.current));
 		var lastid = -1;
-		setLoad(1);
+		if (firsttime) {
+			setLoad(1);
+		}
 
 		fetch(endpoint + "/message_view", {
 			method: "POST",
@@ -181,7 +192,7 @@ function ChatView(props) {
 	}, [chatroom]);
 
 	return (
-		<div>
+		<div className={classes.chatView} id="chatview">
 			<List>
 				{msgs.messages.map((v, index) => {
 					return <MsgView key={v.msgid} data={v}></MsgView>;
@@ -319,9 +330,6 @@ function ChatForm(props) {
 			}}
 		>
 			<form id="msginput-form">
-				<Typography variant="body1">
-					Send message at chatroom: {chatroom}
-				</Typography>
 				<TextField
 					id="msginput-textarea"
 					label="Input Message (LaTeX supported)"
@@ -340,6 +348,9 @@ function ChatForm(props) {
 				>
 					Send
 				</Button>
+				<span style={{ marginLeft: 10, marginRight: 20 }}>
+					Chatroom: {chatroom}
+				</span>
 				<input
 					accept="image/*"
 					id="upload-pic"
@@ -431,8 +442,11 @@ function MsgView(props) {
 		}
 	}
 
+	var closeSBid = -1;
+
 	function handleRecall() {
 		var msgid = data.msgid;
+		closeSnackbar(closeSBid);
 		var rmData = new FormData();
 		rmData.append("id", getCookie("lc_uid"));
 		rmData.append("pwd", getCookie("lc_passw"));
@@ -455,12 +469,10 @@ function MsgView(props) {
 	}
 
 	function handleRecallBtn() {
-		handleInformWithAction(
+		closeSBid = handleInformWithAction(
 			"Sure to recall message " + data.msgid + "?",
 			"warning",
-			<React.Fragment>
-				<Button onClick={handleRecall}>Yes</Button>
-			</React.Fragment>
+			<Button onClick={handleRecall}>Yes</Button>
 		);
 	}
 
@@ -496,7 +508,7 @@ function MsgView(props) {
 						secondary={
 							<React.Fragment>
 								{renderMsg(data)}
-								{data.time + " @ " + data.app + " "}
+								{data.time /* + " @ " + data.app*/ + " "}
 								<a
 									style={
 										getCookie("lc_uid") === data.uid
@@ -518,47 +530,6 @@ function MsgView(props) {
 		</React.Fragment>
 	);
 }
-
-function ScrollBtn(props) {
-	const { children, window, direction } = props;
-	const classes = useStyles();
-	var tri = useScrollTrigger({
-		target: window ? window() : undefined,
-		disableHysteresis: true,
-		threshold: 250
-	});
-	if (direction === "back") {
-		tri = !tri;
-	}
-	const trigger = tri;
-
-	const handleClick = (event) => {
-		const anchor = (event.target.ownerDocument || document).querySelector(
-			direction == "back" ? "#top-to-back-anchor" : "#back-to-top-anchor"
-		);
-
-		if (anchor) {
-			anchor.scrollIntoView({ behavior: "smooth", block: "center" });
-		}
-	};
-
-	return (
-		<Zoom in={trigger}>
-			<div
-				onClick={handleClick}
-				role="presentation"
-				className={classes.root}
-			>
-				{children}
-			</div>
-		</Zoom>
-	);
-}
-
-ScrollBtn.propTypes = {
-	children: PropTypes.element.isRequired,
-	window: PropTypes.func
-};
 
 function LeftBar(props) {
 	const classes = useStyles();
@@ -708,78 +679,57 @@ export default function App(props) {
 	}
 
 	useEffect(() => {
-		const anchor = document.querySelector("#top-to-back-anchor");
-
-		if (anchor) {
-			anchor.scrollIntoView({ behavior: "smooth", block: "center" });
-		}
-		//document.querySelector("#chatarea").addEventListener("dragover", handleDrop);
+		const chatviewDiv = document.getElementById("chatview");
+		chatviewDiv.scrollTop = chatviewDiv.scrollHeight;
 	});
 
 	return (
 		<React.Fragment>
 			<ThemeProvider theme={theme}>
-				<CssBaseline />
-				<AppBar position="sticky" className={classes.appBar}>
-					<Toolbar>
-						<IconButton
-							edge="start"
-							className={classes.menuButton}
-							color="inherit"
-							aria-label="Home"
-							onClick={handleDrawerOpen}
-						>
-							<MenuIcon />
-						</IconButton>
-						<Typography variant="h5" className={classes.menuTitle}>
-							{lc_config.title}
-						</Typography>
-					</Toolbar>
-				</AppBar>
-				<Toolbar id="back-to-top-anchor" />
-				<Drawer
-					className={classes.drawer}
-					classes={{ paper: classes.drawerPaper }}
-					anchor="left"
-					open={dropen}
-					onClose={handleDrawerClose}
-					onClick={handleDrawerClose}
-				>
-					<LeftBar />
-				</Drawer>
-				<Container id="chatarea" className={classes.content}>
-					<ChatView
-						{...props}
-						endpoint={lc_config.endpoint}
-						chatroom={room}
-					/>
-					<br />
-					<ChatForm
-						{...props}
-						endpoint={lc_config.endpoint}
-						chatroom={room}
-						className={classes.chatForm}
-					/>
-					<Toolbar id="top-to-back-anchor" />
-				</Container>
-				<ScrollBtn direction="back" {...props}>
-					<Fab
-						color="secondary"
-						size="small"
-						aria-label="scroll to bottom"
+				<div className={classes.chatWrap}>
+					<CssBaseline />
+					<AppBar position="sticky" className={classes.appBar}>
+						<Toolbar>
+							<IconButton
+								edge="start"
+								className={classes.menuButton}
+								color="inherit"
+								aria-label="Home"
+								onClick={handleDrawerOpen}
+							>
+								<MenuIcon />
+							</IconButton>
+							<Typography
+								variant="h5"
+								className={classes.menuTitle}
+							>
+								{lc_config.title}
+							</Typography>
+						</Toolbar>
+					</AppBar>
+					<Drawer
+						className={classes.drawer}
+						classes={{ paper: classes.drawerPaper }}
+						anchor="left"
+						open={dropen}
+						onClose={handleDrawerClose}
+						onClick={handleDrawerClose}
 					>
-						<AddCommentIcon />
-					</Fab>
-				</ScrollBtn>
-				<ScrollBtn direction="top" {...props}>
-					<Fab
-						color="secondary"
-						size="small"
-						aria-label="scroll back to top"
-					>
-						<KeyboardArrowUpIcon />
-					</Fab>
-				</ScrollBtn>
+						<LeftBar />
+					</Drawer>
+					<Container id="chatarea" className={classes.content}>
+						<ChatView
+							{...props}
+							endpoint={lc_config.endpoint}
+							chatroom={room}
+						/>
+						<ChatForm
+							{...props}
+							endpoint={lc_config.endpoint}
+							chatroom={room}
+						/>
+					</Container>
+				</div>
 			</ThemeProvider>
 		</React.Fragment>
 	);
