@@ -4,7 +4,7 @@
 
 软件暂时还在开发中，所以仍有大量的功能等待实现！
 
-软件基于[LandChat](https://github.com/landchat/landchat)服务端构建，因此请先部署 LandChat。您需要把两个应用部署在同一个根域名下以共享 Cookies.
+软件基于[LandChat-Server](https://github.com/landchat/landchat-server)构建，因此请先部署它。服务端基于PHP语言构建。您可以在任意域名下部署。
 
 ## 截图
 
@@ -17,6 +17,7 @@
 ### 安装
 
 ```bash
+cd 您的项目部署路径
 yarn
 ```
 
@@ -44,6 +45,11 @@ yarn build
 后端，即 api server，使用 php 编写，数据库由 MySQLi 驱动。
 
 ## 近几次更新日志
+
+### 1.0.4
+
+1. 解决了一个定时器清除问题。
+2. 同时将landchat-server开源。
 
 ### 1.0.3
 

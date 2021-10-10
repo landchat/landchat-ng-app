@@ -11,6 +11,9 @@
 # production
 /build
 
+# API Server
+/api
+
 # deprecated
 /src/Deprecated
 

@@ -35,6 +35,7 @@ import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import AddCommentIcon from "@material-ui/icons/AddComment";
 import HomeIcon from "@material-ui/icons/Home";
 import MenuIcon from "@material-ui/icons/Menu";
+import BackspaceIcon from "@material-ui/icons/Backspace";
 import AddAPhotoIcon from "@material-ui/icons/AddAPhoto";
 import { useSnackbar } from "notistack";
 import { Link, useHistory } from "react-router-dom";
@@ -155,7 +156,7 @@ function ChatView(props) {
 	function loadRoom(firsttime) {
 		//alert(JSON.stringify(msgsRef.current));
 		var lastid = -1;
-		if (firsttime) {
+		if (firsttime !== 0) {
 			setLoad(1);
 		}
 
@@ -176,10 +177,10 @@ function ChatView(props) {
 			.catch((error) => handleInform("Fetch failed: " + error, "error"))
 			.then((response) => updateMsg(response, firsttime))
 			.then(function () {
-				setTimeo(
-					setTimeout(function () {
-						loadRoom(0);
-					}, 5000)
+			    setTimeo(
+				setTimeout(function () {
+					loadRoom(0);
+				}, 5000)
 				);
 			});
 	}
@@ -519,7 +520,8 @@ function MsgView(props) {
 									onClick={handleRecallBtn}
 									className={classes.link}
 								>
-									| Recall
+								&nbsp;|&nbsp;<BackspaceIcon style={{ fontSize: 12 }} />
+									&nbsp;Recall
 								</a>
 							</React.Fragment>
 						}
